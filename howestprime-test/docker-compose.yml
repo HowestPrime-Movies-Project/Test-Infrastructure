@@ -1,5 +1,73 @@
 services:
+  movies-db-test:
+    image: postgres:latest
+    container_name: movies-db.howestprime.test
+    networks:
+      - movies-howestprime-test
+    volumes:
+      - movies_db_data:/var/lib/postgresql/
+    ports:
+      - "40221:5000" # Database
+    env_file:
+      - .movies-db.howestprime.test.env
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
+
+
+  messagebroker-test:
+    image: cloudamqp/lavinmq
+    container_name: messagebroker.howestprime.test
+    networks:
+      - movies-howestprime-test
+    ports:
+      - "40200:5672"  # AMQP
+      - "40201:15672" # Management UI
+    healthcheck:
+      test: [ "CMD-SHELL", "lavinmqctl status | grep -q 'Uptime: ' || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
+  
+  
+  movies-api-test:
+    image: howestprime-movies-api:latest
+    container_name: movies.howestprime.test
+    networks:
+      - movies-howestprime-test
+    ports:
+      - "40220:8000" # API
+    env_file:
+      - .movies.howestprime.test.env
+    depends_on:
+      - movies-db-test
+    restart: unless-stopped
+      
+  movies-backoffice-test:
+    image: howestprime-backoffice:latest
+    container_name: client-backoffice.howestprime.test
+    networks:
+      - movies-howestprime-test
+    ports:
+      - "10210:8080" # Backoffice UI
+    env_file:
+      - .client-backoffice.howestprime.test.env
+    restart: unless-stopped
+    depends_on:
+      - movies-api-test
+    
 
 networks:
+  movies-howestprime-test:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.22.0.0/16
 
 volumes:
+    movies_db_data:

@@ -1,4 +1,5 @@
+*.test.env
 .idea
 .vscode
 data
-DS_Store
+DS_Storete
