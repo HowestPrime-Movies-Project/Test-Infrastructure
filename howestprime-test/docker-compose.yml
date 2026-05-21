@@ -1,13 +1,14 @@
 services:
+# DATABASES 
   movies-db-test:
     image: postgres:latest
     container_name: movies-db.howestprime.test
     networks:
-      - movies-howestprime-test
+      - howestprime-test
     volumes:
-      - movies_db_data:/var/lib/postgresql/
+      - movies-db-data:/var/lib/postgresql/
     ports:
-      - "40221:5000" # Database
+      - "40221:5000" # DATABASE PORT
     env_file:
       - .movies-db.howestprime.test.env
     restart: unless-stopped
@@ -18,15 +19,47 @@ services:
       retries: 5
       start_period: 40s
 
+  ticketing-db-test:
+    image: mongo:latest
+    container_name: ticketing-db.howestprime.dev
+    networks:
+      - howestprime-test
+    env_file:
+      - .ticketing-db.howestprime.test.env
+    volumes:
+      - ticketing-db-data:/data/db
+    ports:
+      - "40231:5000"    # DATABASE PORT
+    command: >
+      bash -c "
+        mongod --port 5000 --replSet rs0 --bind_ip_all &
+        until mongosh --port 5000 --eval 'print(\"waited for connection\")'
+        do
+          sleep 1
+        done
+        mongosh --port 5000 --eval 'rs.initiate({
+          _id: \"rs0\",
+          members: [{ _id: 0, host: \"ticketing-db.howestprime.dev:5000\" }]
+        })'
+        wait "
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --port 5000 --eval 'db.adminCommand(\"ping\")'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
 
+
+
+# MESSAGEBROKER
   messagebroker-test:
     image: cloudamqp/lavinmq
     container_name: messagebroker.howestprime.test
     networks:
-      - movies-howestprime-test
+      - howestprime-test
     ports:
-      - "40200:5672"  # AMQP
-      - "40201:15672" # Management UI
+      - "40200:5672"  # AMQP PORT
+      - "40201:15672" # Management UI PORT
     healthcheck:
       test: [ "CMD-SHELL", "lavinmqctl status | grep -q 'Uptime: ' || exit 1" ]
       interval: 10s
@@ -35,24 +68,42 @@ services:
       start_period: 40s
   
   
+
+# APIS
   movies-api-test:
     image: howestprime-movies-api:latest
     container_name: movies.howestprime.test
     networks:
-      - movies-howestprime-test
+      - howestprime-test
     ports:
-      - "40220:8000" # API
+      - "40220:8000" # API PORT
     env_file:
       - .movies.howestprime.test.env
     depends_on:
       - movies-db-test
     restart: unless-stopped
-      
+
+  ticketing-api-test:
+    image: ticketing-service:latest
+    container_name: howestprime-ticketing-api
+    networks:
+      - howestprime-test
+    ports:
+      - "40230:8000" # API PORT
+    env_file:
+      - .ticketing.howestprime.test.env
+    depends_on:
+      - ticketing-db-test
+    restart: unless-stopped
+    
+  
+
+# FRONT END
   movies-backoffice-test:
     image: howestprime-backoffice:latest
     container_name: client-backoffice.howestprime.test
     networks:
-      - movies-howestprime-test
+      - howestprime-test
     ports:
       - "10210:8080" # Backoffice UI
     env_file:
@@ -60,14 +111,30 @@ services:
     restart: unless-stopped
     depends_on:
       - movies-api-test
+
+  movies-client-webapp-test:
+    image: hcr.technet.howest.be/howestprime-client-webapp:latest
+    container_name: client-webapp.howestprime.test
+    networks:
+      - howestprime-test
+    ports:
+      - "10200:80" # Client WebApp UI PORT
+    env_file:
+      - .client-webapp.howestprime.test.env
+    restart: unless-stopped
+    depends_on:
+      - movies-api-test
+      - ticketing-api-test
     
 
+
 networks:
-  movies-howestprime-test:
+  howestprime-test:
     driver: bridge
     ipam:
       config:
         - subnet: 10.22.0.0/16
 
 volumes:
-    movies_db_data:
+    movies-db-data:
+    ticketing-db-data:
