@@ -21,7 +21,7 @@ services:
 
   ticketing-db-test:
     image: mongo:latest
-    container_name: ticketing-db.howestprime.dev
+    container_name: ticketing-db.howestprime.test
     networks:
       - howestprime-test
     env_file:
@@ -39,7 +39,7 @@ services:
         done
         mongosh --port 5000 --eval 'rs.initiate({
           _id: \"rs0\",
-          members: [{ _id: 0, host: \"ticketing-db.howestprime.dev:5000\" }]
+          members: [{ _id: 0, host: \"ticketing-db.howestprime.test:5000\" }]
         })'
         wait "
     healthcheck:
@@ -81,11 +81,12 @@ services:
       - .movies.howestprime.test.env
     depends_on:
       - movies-db-test
+      - messagebroker-test
     restart: unless-stopped
 
   ticketing-api-test:
     image: ticketing-service:latest
-    container_name: howestprime-ticketing-api
+    container_name: ticketing.howestprime.test
     networks:
       - howestprime-test
     ports:
@@ -94,6 +95,7 @@ services:
       - .ticketing.howestprime.test.env
     depends_on:
       - ticketing-db-test
+      - messagebroker-test
     restart: unless-stopped
     
   

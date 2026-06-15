@@ -10,6 +10,12 @@
 `docker logs -f <container_name>`
 
 ### QUICK LINKS
+> [Client WebApp](http://localhost:10200/)
+
 > [Client Backoffice](http://localhost:10210/)
 
-> [Swagger](http://localhost:40220/swagger)
+> [Movies API Swagger](http://localhost:40220/swagger)
+
+> [Ticketing API Swagger](http://localhost:40230/swagger)
+
+> [LavinMQ Management UI](http://localhost:40201/)
