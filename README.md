@@ -1,72 +1,126 @@
-# HowestPrime Infrastructure Test
+<div align="center">
 
-This repository contains the infrastructure and test setup for the HowestPrime movie platform. It brings together the supporting services, Docker-based test environment, API containers, and the front-end apps used during integration testing.
+# 🧪 HowestPrime Test Infrastructure
 
-## Overview
+**A Docker-based integration environment for running the HowestPrime movie platform locally with its supporting services.**
 
-The project is designed to run the platform in a local containerized environment with:
+<p>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker badge">
+  <img src="https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose badge">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL badge">
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB badge">
+  <img src="https://img.shields.io/badge/LavinMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" alt="LavinMQ badge">
+  <img src="https://img.shields.io/badge/HTTP_Testing-6E6E6E?style=for-the-badge&logo=postman&logoColor=white" alt="HTTP testing badge">
+</p>
 
-- PostgreSQL for the movies database
-- MongoDB for ticketing data
-- LavinMQ for messaging
-- Movies API
-- Ticketing API
-- Backoffice UI
-- Client web app
+</div>
 
-## Repository structure
+> Local integration support for validating the system as a connected whole.
 
-- `howestprime-test/` – Docker Compose environment and startup instructions
-- `http_requests/` – HTTP files for quick API testing
-- `Dockerfile` – image used for the ticketing microservice build
-- `Commands.md` – Docker image build commands for related repositories
+## 📑 Table of Contents
 
-## Prerequisites
+- [📖 About](#about)
+- [🏗️ Architecture](#architecture)
+- [✨ Features](#features)
+- [📱 Service Access](#service-access)
+- [🛠️ Tech Stack](#tech-stack)
+- [🚀 Getting Started](#getting-started)
+- [📄 License](#license)
+- [👤 Author](#author)
 
-Before running the environment, make sure the following are installed:
+## 📖 About
 
-- Docker
-- Docker Compose
-- Access to the required project images or repositories used by the stack
+- This repository contains the local infrastructure and test setup for the HowestPrime movie platform.
+- It brings together the backing services and the application endpoints used during integration testing.
+- The stack is designed to make end-to-end validation repeatable on a developer machine.
+- HTTP request files and setup notes live alongside the Docker configuration for convenience.
 
-## Start the environment
+## 🏗️ Architecture
 
-From the repository root, run:
-
-```bash
-docker compose -f howestprime-test/docker-compose.yml up -d --remove-orphans
+```mermaid
+flowchart LR
+    Dev[Developer Machine] --> DC[Docker Compose]
+    DC --> PG[(PostgreSQL)]
+    DC --> MONGO[(MongoDB)]
+    DC --> MQ[LavinMQ]
+    DC --> WEB[Client Web App]
+    DC --> BO[Backoffice]
+    DC --> MOVIES[Movies API]
+    DC --> TICK[Ticketing API]
 ```
 
-To stop it:
+## ✨ Features
 
-```bash
-docker compose -f howestprime-test/docker-compose.yml down
-```
+**🧩 Supporting services**
 
-## Service access
+- PostgreSQL for the movies service.
+- MongoDB for the ticketing service.
+- LavinMQ for asynchronous messaging.
+
+**🖥️ Application endpoints**
+
+- Client web app for the public experience.
+- Backoffice UI for staff workflows.
+- Movies API and ticketing API for backend validation.
+
+**🧪 Test utilities**
+
+- HTTP request examples for quick API checks.
+- Notes for building related container images.
+- Repeatable startup and shutdown commands for local integration tests.
+
+## 📱 Service Access
 
 | Service | URL |
-|---|---|
+| --- | --- |
 | Client WebApp | http://localhost:10200/ |
 | Client Backoffice | http://localhost:10210/ |
 | Movies API Swagger | http://localhost:40220/swagger |
 | Ticketing API | http://localhost:40230/ |
 | LavinMQ Management UI | http://localhost:40201/ |
 
-## Useful commands
+## 🛠️ Tech Stack
 
-Check logs for a specific container:
+| Area | Technologies |
+| --- | --- |
+| Containerization | Docker, Docker Compose |
+| Database | PostgreSQL, MongoDB |
+| Messaging | LavinMQ |
+| API testing | HTTP request files |
+| Supporting docs | Markdown |
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+- Access to the required images or build context for the platform services
+
+### Start the environment
 
 ```bash
-docker logs -f <container_name>
+docker compose -f howestprime-test/docker-compose.yml up -d --remove-orphans
 ```
 
-## Related notes
+### Stop the environment
 
-- See `howestprime-test/run.md` for the test environment commands and quick links.
-- See `Commands.md` for the image build commands used for the other microservices.
-- See `http_requests/http_files.md` for information about `.http` files for API testing.
+```bash
+docker compose -f howestprime-test/docker-compose.yml down
+```
 
-## Purpose
+### Helpful references
 
-This repository acts as the local infrastructure layer for validating how the different HowestPrime services connect and communicate together in a realistic test environment.
+- See `howestprime-test/run.md` for the environment commands and quick links.
+- See `Commands.md` for the image build commands used by the related services.
+- See `http_requests/http_files.md` for information about the HTTP request files.
+
+## 📄 License
+
+This project uses the Apache 2.0 License
+
+## 👤 Author
+
+| Name | GitHub | LinkedIn |
+| --- | --- | --- |
+| Maurice De Kegel | [MriceDK](https://github.com/MriceDK) | [LinkedIn](https://www.linkedin.com/in/dekegelmaurice/) |
